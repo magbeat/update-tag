@@ -21,12 +21,11 @@ func main() {
 	latestTag, err := GetLatestTagFromRepository(repo)
 	CheckIfError(err)
 
-	latestTag = strings.Split(latestTag, "/")[2]
-
 	currentTag, err := semver.Make("0.0.0-RC0")
 	CheckIfError(err)
 
 	if latestTag != "" {
+		latestTag = strings.Split(latestTag, "/")[2]
 		currentTag, err = semver.Parse(latestTag)
 		CheckIfError(err)
 	}
@@ -52,7 +51,7 @@ func updateTag(branch string, tag semver.Version, tags []semver.Version, repo *g
 	fmt.Println("\nPossible new Tags:")
 
 	for index, newTag := range tags {
-		fmt.Println(fmt.Sprintf(" %d) %s", index + 1, newTag))
+		fmt.Println(fmt.Sprintf(" %d) %s", index+1, newTag))
 	}
 
 	fmt.Print("Please choose a tag: ")
@@ -63,7 +62,7 @@ func updateTag(branch string, tag semver.Version, tags []semver.Version, repo *g
 		// fmt.Println(tags[tagIndex - 1])
 		head, err := repo.Head()
 		CheckIfError(err)
-		_, err = repo.CreateTag(tags[tagIndex - 1].String(), head.Hash(), nil)
+		_, err = repo.CreateTag(tags[tagIndex-1].String(), head.Hash(), nil)
 		CheckIfError(err)
 	} else {
 		fmt.Println("Index out of range")
@@ -75,10 +74,11 @@ func updateTag(branch string, tag semver.Version, tags []semver.Version, repo *g
 	_, err = fmt.Scanln(&push)
 	CheckIfError(err)
 
-
 	if push == "y" {
 		fmt.Println(push)
-		err = repo.Push(nil)
+		err = repo.Push(&git.PushOptions{
+			RemoteName: "origin",
+		})
 		CheckIfError(err)
 	}
 

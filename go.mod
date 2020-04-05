@@ -3,7 +3,7 @@ module github.com/magbeat/update-tag
 go 1.14
 
 require (
-	github.com/blang/semver v3.5.1+incompatible // indirect
+	github.com/blang/semver v3.5.1+incompatible
 	github.com/kr/pretty v0.2.0 // indirect
 	github.com/kr/text v0.2.0 // indirect
 	github.com/libgit2/git2go/v29 v29.0.2 // indirect
