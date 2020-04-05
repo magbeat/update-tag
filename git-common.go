@@ -6,28 +6,6 @@ import (
 	"gopkg.in/src-d/go-git.v4/plumbing/object"
 )
 
-func GetCurrentBranchFromRepository(repository *git.Repository) (string, error) {
-	branchRefs, err := repository.Branches()
-	CheckIfError(err)
-
-	headRef, err := repository.Head()
-	CheckIfError(err)
-
-	var currentBranchName string
-	err = branchRefs.ForEach(func(branchRef *plumbing.Reference) error {
-		if branchRef.Hash() == headRef.Hash() {
-			currentBranchName = branchRef.Name().String()
-
-			return nil
-		}
-
-		return nil
-	})
-	CheckIfError(err)
-
-	return currentBranchName, nil
-}
-
 func GetLatestTagFromRepository(repository *git.Repository) (string, error) {
 	tagRefs, err := repository.Tags()
 	CheckIfError(err)

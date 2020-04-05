@@ -15,11 +15,13 @@ func main() {
 	repo, err := git.PlainOpen(currentDir)
 	CheckIfError(err)
 
-	currentBranch, err := GetCurrentBranchFromRepository(repo)
+	headRef, err := repo.Head()
 	CheckIfError(err)
 
 	latestTag, err := GetLatestTagFromRepository(repo)
 	CheckIfError(err)
+
+	latestTag = strings.Split(latestTag, "/")[2]
 
 	currentTag, err := semver.Make("0.0.0-RC0")
 	CheckIfError(err)
@@ -31,20 +33,20 @@ func main() {
 
 	major, minor, patch, pre, err := calculateNextTag(currentTag)
 
-	if strings.HasSuffix(currentBranch, "master") {
+	if strings.HasSuffix(headRef.String(), "master") {
 		stableTags, err := getStableTags(currentTag, major, minor, patch)
 		CheckIfError(err)
-		userChoice("Stable", currentTag, stableTags)
-	} else if strings.HasSuffix(currentBranch, "develop") {
+		updateTag("Stable", currentTag, stableTags, repo)
+	} else if strings.HasSuffix(headRef.String(), "develop") {
 		developmentTags, err := getDevelopmentTags(currentTag, major, minor, pre)
 		CheckIfError(err)
-		userChoice("Development", currentTag, developmentTags)
+		updateTag("Development", currentTag, developmentTags, repo)
 	} else {
 		fmt.Println("Tagging only allowed from stable or development branch")
 	}
 }
 
-func userChoice(branch string, tag semver.Version, tags []semver.Version) {
+func updateTag(branch string, tag semver.Version, tags []semver.Version, repo *git.Repository) {
 	fmt.Println(fmt.Sprintf("%s branch found", branch))
 	fmt.Println(fmt.Sprintf("Current tag: %s", tag))
 	fmt.Println("\nPossible new Tags:")
@@ -52,6 +54,35 @@ func userChoice(branch string, tag semver.Version, tags []semver.Version) {
 	for index, newTag := range tags {
 		fmt.Println(fmt.Sprintf(" %d) %s", index + 1, newTag))
 	}
+
+	fmt.Print("Please choose a tag: ")
+	var tagIndex int
+	_, err := fmt.Scanln(&tagIndex)
+	CheckIfError(err)
+	if tagIndex > 0 && tagIndex <= len(tags) {
+		// fmt.Println(tags[tagIndex - 1])
+		head, err := repo.Head()
+		CheckIfError(err)
+		_, err = repo.CreateTag(tags[tagIndex - 1].String(), head.Hash(), nil)
+		CheckIfError(err)
+	} else {
+		fmt.Println("Index out of range")
+		os.Exit(0)
+	}
+
+	fmt.Print("Push to repo (y/n): ")
+	var push string
+	_, err = fmt.Scanln(&push)
+	CheckIfError(err)
+
+
+	if push == "y" {
+		fmt.Println(push)
+		err = repo.Push(nil)
+		CheckIfError(err)
+	}
+
+	os.Exit(0)
 }
 
 func getDevelopmentTags(tag semver.Version, newMajor uint64, newMinor uint64, newPre semver.PRVersion) ([]semver.Version, error) {
