@@ -1,4 +1,4 @@
-module github.com/magbeat/update-tag
+module gitlab.com/novaloop-oss/update-tag
 
 go 1.14
 
