@@ -77,11 +77,20 @@ func updateTag(branch string, tag semver.Version, tags []semver.Version, repo *g
 func getDevelopmentTags(tag semver.Version, newMajor uint64, newMinor uint64, newPre semver.PRVersion) ([]semver.Version, error) {
 	var versions []semver.Version
 	var err error = nil
+	rc0 := "RC0"
 
 	var newMajorVersion semver.Version
-	newMajorVersion, err = semver.Make(fmt.Sprintf("%d.%d.%d-%s", newMajor, tag.Minor, tag.Patch, newPre))
+	if len(tag.Pre) > 0 && tag.Minor == 0 {
+		newMajorVersion, err = semver.Make(fmt.Sprintf("%d.%d.%d-%s", tag.Major, 0, 0, newPre))
+	} else {
+		newMajorVersion, err = semver.Make(fmt.Sprintf("%d.%d.%d-%s", newMajor, 0, 0, rc0))
+	}
 	var newMinorVersion semver.Version
-	newMinorVersion, err = semver.Make(fmt.Sprintf("%d.%d.%d-%s", tag.Major, newMinor, tag.Patch, newPre))
+	if len(tag.Pre) > 0 && tag.Minor != 0 {
+		newMinorVersion, err = semver.Make(fmt.Sprintf("%d.%d.%d-%s", tag.Major, tag.Minor, tag.Patch, newPre))
+	} else {
+		newMinorVersion, err = semver.Make(fmt.Sprintf("%d.%d.%d-%s", tag.Major, newMinor, tag.Patch, rc0))
+	}
 
 	versions = append(versions, newMajorVersion)
 	versions = append(versions, newMinorVersion)
