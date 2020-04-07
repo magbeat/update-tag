@@ -1,4 +1,4 @@
-package main
+package helper
 
 import (
 	"github.com/blang/semver"
