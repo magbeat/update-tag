@@ -26,7 +26,32 @@ func TestGetDevelopmentTags(t *testing.T) {
 
 	for _, test := range tests {
 		got, _ := GetDevelopmentTags(test.currentVersion, test.newMajor, test.newMinor, test.newPre)
-		assert.Equal(got, test.want)
+		assert.Equal(test.want, got)
+	}
+}
+func TestGetStableTags(t *testing.T) {
+	assert := assert.New(t)
+
+	var tests = []struct {
+		currentVersion semver.Version
+		newMajor       uint64
+		newMinor       uint64
+		newPatch       uint64
+		want           []semver.Version
+	}{
+		{createVersion("0.0.0"), 1, 1, 1,
+			[]semver.Version{createVersion("1.0.0"), createVersion("0.1.0"), createVersion("0.0.1")}},
+		{createVersion("1.1.1"), 2, 2, 2,
+			[]semver.Version{createVersion("2.0.0"), createVersion("1.2.0"), createVersion("1.1.2")}},
+		{createVersion("1.0.0-RC2"), 2, 1, 1,
+			[]semver.Version{createVersion("1.0.0")}},
+		{createVersion("1.1.0-RC2"), 2, 2, 1,
+			[]semver.Version{createVersion("1.1.0")}},
+	}
+
+	for _, test := range tests {
+		got, _ := GetStableTags(test.currentVersion, test.newMajor, test.newMinor, test.newPatch)
+		assert.Equal(test.want, got)
 	}
 }
 

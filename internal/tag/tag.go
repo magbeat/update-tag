@@ -33,16 +33,17 @@ func GetStableTags(tag semver.Version, newMajor uint64, newMinor uint64, newPatc
 	var versions []semver.Version
 	var err error = nil
 
-	var newMajorVersion semver.Version
-	newMajorVersion, err = semver.Make(fmt.Sprintf("%d.%d.%d", newMajor, 0, 0))
-	var newMinorVersion semver.Version
-	newMinorVersion, err = semver.Make(fmt.Sprintf("%d.%d.%d", tag.Major, newMinor, 0))
-	var newPatchVersion semver.Version
-	newPatchVersion, err = semver.Make(fmt.Sprintf("%d.%d.%d", tag.Major, tag.Minor, newPatch))
-
-	versions = append(versions, newMajorVersion)
-	versions = append(versions, newMinorVersion)
-	versions = append(versions, newPatchVersion)
+	if len(tag.Pre) > 0 {
+		newVersion, _ := semver.Make(fmt.Sprintf("%d.%d.%d", tag.Major, tag.Minor, tag.Patch))
+		versions = append(versions, newVersion)
+	} else {
+		newMajorVersion, _ := semver.Make(fmt.Sprintf("%d.%d.%d", newMajor, 0, 0))
+		newMinorVersion, _ := semver.Make(fmt.Sprintf("%d.%d.%d", tag.Major, newMinor, 0))
+		newPatchVersion, _ := semver.Make(fmt.Sprintf("%d.%d.%d", tag.Major, tag.Minor, newPatch))
+		versions = append(versions, newMajorVersion)
+		versions = append(versions, newMinorVersion)
+		versions = append(versions, newPatchVersion)
+	}
 
 	return versions, err
 }
