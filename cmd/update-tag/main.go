@@ -68,8 +68,8 @@ func updateTag(branch string, tag semver.Version, tags []semver.Version, repo *g
 	common.CheckIfError(err)
 
 	if result == "Yes" {
-		push := exec.Command("gito", "push")
-		pushTags := exec.Command("gito", "push", "--tags")
+		push := exec.Command("git", "push")
+		pushTags := exec.Command("git", "push", "--tags")
 		err = push.Run()
 		common.CheckIfError(err)
 		err = pushTags.Run()
