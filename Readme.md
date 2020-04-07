@@ -2,7 +2,7 @@
 
 ## Installation
 
-`go get gitlab.com/novaloop-oss/update-tag`
+`go get gitlab.com/novaloop-oss/update-tag/cmd/update-tag`
 
 ## Build
 
