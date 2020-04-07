@@ -6,7 +6,11 @@
 
 ## Build
 
-`go build -o update-tag`
+`make build`
+
+## Build
+
+`make run`
 
 ## Usage
 
