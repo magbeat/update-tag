@@ -3,9 +3,11 @@ package main
 import (
 	"fmt"
 	"github.com/blang/semver"
-	"gopkg.in/src-d/go-git.v4"
+	"github.com/go-git/go-git/v5"
+	"github.com/manifoldco/promptui"
 	"os"
-	"strings"
+	"os/exec"
+	"regexp"
 )
 
 func main() {
@@ -23,54 +25,53 @@ func main() {
 
 	major, minor, patch, pre, err := calculateNextTag(latestVersion)
 
-	if strings.HasSuffix(headRef.String(), "master") {
+	var masterBranch = regexp.MustCompile(`master$`)
+	var developmentBranch = regexp.MustCompile(`develop|feature`)
+
+	if masterBranch.MatchString(headRef.String()) {
 		stableTags, err := getStableTags(latestVersion, major, minor, patch)
 		CheckIfError(err)
 		updateTag("Stable", latestVersion, stableTags, repo)
-	} else if strings.HasSuffix(headRef.String(), "develop") {
+	} else if developmentBranch.MatchString(headRef.String()) {
 		developmentTags, err := getDevelopmentTags(latestVersion, major, minor, pre)
 		CheckIfError(err)
-		updateTag("Development", latestVersion, developmentTags, repo)
+		updateTag("Development or feature branch", latestVersion, developmentTags, repo)
 	} else {
-		fmt.Println("Tagging only allowed from stable or development branch")
+		fmt.Println("Tagging only allowed from master, develop or feature branches")
 	}
 }
 
 func updateTag(branch string, tag semver.Version, tags []semver.Version, repo *git.Repository) {
 	fmt.Println(fmt.Sprintf("%s branch found", branch))
 	fmt.Println(fmt.Sprintf("Current tag: %s", tag))
-	fmt.Println("\nPossible new Tags:")
 
-	for index, newTag := range tags {
-		fmt.Println(fmt.Sprintf(" %d) %s", index+1, newTag))
+	prompt := promptui.Select{
+		Label: "Select Tag",
+		Items: tags,
 	}
-
-	fmt.Print("Please choose a tag: ")
-	var tagIndex int
-	_, err := fmt.Scanln(&tagIndex)
-	CheckIfError(err)
-	if tagIndex > 0 && tagIndex <= len(tags) {
-		head, err := repo.Head()
-		CheckIfError(err)
-		_, err = repo.CreateTag(tags[tagIndex-1].String(), head.Hash(), nil)
-		CheckIfError(err)
-	} else {
-		fmt.Println("Index out of range")
-		os.Exit(0)
-	}
-
-	fmt.Print("Push to repo (y/n): ")
-	var push string
-	_, err = fmt.Scanln(&push)
+	_, result, err := prompt.Run()
 	CheckIfError(err)
 
-	if push == "y" {
-		err = repo.Push(&git.PushOptions{
-			RemoteName: "origin",
-		})
-		CheckIfError(err)
+	head, err := repo.Head()
+	CheckIfError(err)
+	_, err = repo.CreateTag(result, head.Hash(), nil)
+
+	prompt = promptui.Select{
+		Label: "Push to repo?",
+		Items: []string{"Yes", "No"},
 	}
 
+	_, result, err = prompt.Run()
+	CheckIfError(err)
+
+	if result == "Yes" {
+		push := exec.Command("git", "push")
+		pushTags := exec.Command("git", "push", "--tags")
+		err = push.Run()
+		CheckIfError(err)
+		err = pushTags.Run()
+		CheckIfError(err)
+	}
 	os.Exit(0)
 }
 
