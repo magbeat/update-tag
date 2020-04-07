@@ -7,7 +7,10 @@ run:
 clean:
 	rm update-tag
 
-all: build
+install:
+	go install ./cmd/...
+
+all: clean build
 
 test_internal:
 	go test -v ./internal/...
