@@ -1,9 +1,10 @@
-package helper
+package gito
 
 import (
 	"github.com/blang/semver"
 	"github.com/go-git/go-git/v5"
 	"github.com/go-git/go-git/v5/plumbing"
+	. "gitlab.com/novaloop-oss/update-tag/internal/common"
 	"strings"
 )
 
