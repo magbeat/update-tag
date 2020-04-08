@@ -55,6 +55,30 @@ func TestGetStableTags(t *testing.T) {
 	}
 }
 
+func TestCalculateNextTag(t *testing.T) {
+	assert := assert.New(t)
+
+	var tests = []struct {
+		currentVersion semver.Version
+		newMajor       uint64
+		newMinor       uint64
+		newPatch       uint64
+		newPre         semver.PRVersion
+	}{
+		{createVersion("0.0.0"), 1, 1, 1, semver.PRVersion{VersionStr: "RC0"}},
+		{createVersion("1.0.0-RC2"), 2, 1, 1, semver.PRVersion{VersionStr: "RC3"}},
+		{createVersion("2.2.2-RC0"), 3, 3, 3, semver.PRVersion{VersionStr: "RC1"}},
+	}
+
+	for _, test := range tests {
+		newMajor, newMinor, newPatch, newPre, _ := CalculateNextTag(test.currentVersion)
+		assert.Equal(test.newMajor, newMajor)
+		assert.Equal(test.newMinor, newMinor)
+		assert.Equal(test.newPatch, newPatch)
+		assert.Equal(test.newPre, newPre)
+	}
+}
+
 func createVersion(versionString string) semver.Version {
 	version, _ := semver.Parse(versionString)
 	return version

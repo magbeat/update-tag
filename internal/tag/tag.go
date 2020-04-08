@@ -3,6 +3,8 @@ package tag
 import (
 	"fmt"
 	"github.com/blang/semver"
+	"regexp"
+	"strconv"
 )
 
 func GetDevelopmentTags(tag semver.Version, newMajor uint64, newMinor uint64, newPre semver.PRVersion) ([]semver.Version, error) {
@@ -56,7 +58,10 @@ func CalculateNextTag(tag semver.Version) (uint64, uint64, uint64, semver.PRVers
 	var err error = nil
 
 	if len(tag.Pre) > 0 {
-		nextNum := tag.Pre[0].VersionNum + 1
+		re := regexp.MustCompile(`\d`)
+		versionNumString := re.Find([]byte(tag.Pre[0].VersionStr))
+		versionNum, _ := strconv.ParseInt(string(versionNumString), 10, 64)
+		nextNum := versionNum + 1
 		newSuffix, err = semver.NewPRVersion(fmt.Sprintf("RC%d", nextNum))
 	} else {
 		newSuffix, err = semver.NewPRVersion("RC0")
