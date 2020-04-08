@@ -8,9 +8,13 @@
 
 `make build`
 
-## Build
+## Run
 
 `make run`
+
+## Install from sources
+
+`make install`
 
 ## Usage
 
