@@ -14,10 +14,12 @@ import (
 )
 
 func main() {
-	currentDir, err := os.Getwd()
+	gitRoot, err := exec.Command("git", "rev-parse",  "--show-toplevel").Output()
+	re := regexp.MustCompile(`\r?\n`)
+	gitRootString := re.ReplaceAllString(string(gitRoot), "")
 	common.CheckIfError(err)
 
-	repo, err := git.PlainOpen(currentDir)
+	repo, err := git.PlainOpen(gitRootString)
 	common.CheckIfError(err)
 
 	headRef, err := repo.Head()
@@ -68,11 +70,9 @@ func updateTag(branch string, tag semver.Version, tags []semver.Version, repo *g
 	common.CheckIfError(err)
 
 	if result == "Yes" {
-		push := exec.Command("git", "push")
-		pushTags := exec.Command("git", "push", "--tags")
-		err = push.Run()
+		err = exec.Command("git", "push").Run()
 		common.CheckIfError(err)
-		err = pushTags.Run()
+		err = exec.Command("git", "push", "--tags").Run()
 		common.CheckIfError(err)
 	}
 	os.Exit(0)
