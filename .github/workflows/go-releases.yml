@@ -1,6 +1,9 @@
 name: Build Go Releases
 
-on: release
+on:
+  push:
+    tags:
+      - 'v*'
 jobs:
   release-linux-386:
     name: release linux/386
