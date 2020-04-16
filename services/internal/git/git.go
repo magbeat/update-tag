@@ -12,9 +12,7 @@ func GetLatestTagFromRepository(repository *git.Repository) (*semver.Version, er
 	tagRefs, err := repository.Tags()
 	CheckIfError(err)
 
-	reference, _ := tagRefs.Next()
-	initialVersionString := strings.Split(reference.Name().String(), "/")[2]
-	latestVersion, _ := semver.NewVersion(initialVersionString)
+	latestVersion, _ := semver.NewVersion("0.0.0")
 	err = tagRefs.ForEach(func(tagRef *plumbing.Reference) error {
 		tagName := strings.Split(tagRef.Name().String(), "/")[2]
 		tagVersion, _ := semver.NewVersion(tagName)
