@@ -1,20 +1,15 @@
-name: Create Release from Tags and push Artifacts
+name: Build and release Artifacts
 
+# on events
 on:
-  push:
-    tags:
-      - 'v*'
+  release:
+    types:
+      - created
 
 jobs:
-  release:
+  generate:
     runs-on: ubuntu-latest
     steps:
-      - name: Create GitHub release
-        uses: Roang-zero1/github-create-release-action@master
-        with:
-          version_regex: ^v[[:digit:]]+\.[[:digit:]]+\.[[:digit:]]+
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Checkout the repository
         uses: actions/checkout@v2
       - name: Generate build files
