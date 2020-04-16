@@ -49,9 +49,14 @@ func runUpdate(branch string, tag *semver.Version, tags []*semver.Version, repo 
 
 	infoString := fmt.Sprintf("branch: %s\ncurrent tag: %s\nnext tag:", branch, tag.Original())
 
+	v := ""
+	if vPrefix {
+		v = "v"
+	}
+
 	var suggestedTags []string
 	for _, tag := range tags {
-		suggestedTags = append(suggestedTags, tag.Original())
+		suggestedTags = append(suggestedTags, fmt.Sprintf("%s%s", v, tag.String()))
 	}
 	newTagChoice := shell.MultiChoice(suggestedTags, infoString)
 	newTag := suggestedTags[newTagChoice]
