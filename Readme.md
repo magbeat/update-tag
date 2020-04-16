@@ -2,7 +2,7 @@
 
 ## Installation
 
-`go get gitlab.com/novaloop-oss/update-tag/cmd/update-tag`
+`go get github.com/magbeat/update-tag/cmd/update-tag`
 
 ## Build
 
