@@ -55,9 +55,9 @@ func runUpdate(branch string, tag *semver.Version, tags []*semver.Version, repo 
 
 	tagsTemplates := &promptui.SelectTemplates{
 		Label:    "{{ . }}?",
-		Active:   fmt.Sprintf("\U000025B8 {{\"%s\" | green}}{{ .Original | green }}", v),
-		Inactive: fmt.Sprintf("  {{\"%s\" | cyan}}{{ .Original | cyan }}", v),
-		Selected: "\U000025B8 {{ .Original | green }}",
+		Active:   fmt.Sprintf("\U000025B8 {{ \"%s\" | green }}{{ .Original | green }}", v),
+		Inactive: fmt.Sprintf("  {{ \"%s\" | cyan }}{{ .Original | cyan }}", v),
+		Selected: fmt.Sprintf("\U000025B8 {{ \"%s\" | green }}{{ .Original | green }}", v),
 	}
 
 	prompt := promptui.Select{
@@ -67,10 +67,11 @@ func runUpdate(branch string, tag *semver.Version, tags []*semver.Version, repo 
 	}
 	_, result, err := prompt.Run()
 	common.CheckIfError(err)
+	newTag := fmt.Sprintf("%s%s", v, result)
 
 	head, err := repo.Head()
 	common.CheckIfError(err)
-	_, err = repo.CreateTag(result, head.Hash(), nil)
+	_, err = repo.CreateTag(newTag, head.Hash(), nil)
 
 	pushTemplates := &promptui.SelectTemplates{
 		Label:    "{{ . }}?",
