@@ -3,11 +3,11 @@ package services
 import (
 	"fmt"
 	"github.com/Masterminds/semver/v3"
+	"github.com/abiosoft/ishell"
 	"github.com/go-git/go-git/v5"
 	"github.com/magbeat/update-tag/services/internal/common"
 	utgit "github.com/magbeat/update-tag/services/internal/git"
 	"github.com/magbeat/update-tag/services/internal/tag"
-	"github.com/manifoldco/promptui"
 	"os"
 	"os/exec"
 	"regexp"
@@ -45,51 +45,24 @@ func UpdateTag(vPrefix bool, prereleasePrefix string) {
 }
 
 func runUpdate(branch string, tag *semver.Version, tags []*semver.Version, repo *git.Repository, vPrefix bool) {
-	fmt.Println(fmt.Sprintf("%s branch found", branch))
-	fmt.Println(fmt.Sprintf("Current tag: %s", tag.Original()))
+	shell := ishell.New()
 
-	v := ""
-	if vPrefix {
-		v = "v"
-	}
+	infoString := fmt.Sprintf("branch: %s\ncurrent tag: %s\nnext tag:", branch, tag.Original())
 
-	tagsTemplates := &promptui.SelectTemplates{
-		Label:    "{{ . }}?",
-		Active:   fmt.Sprintf("\U000025B8 {{ \"%s\" | green }}{{ .Original | green }}", v),
-		Inactive: fmt.Sprintf("  {{ \"%s\" | cyan }}{{ .Original | cyan }}", v),
-		Selected: fmt.Sprintf("\U000025B8 {{ \"%s\" | green }}{{ .Original | green }}", v),
+	var suggestedTags []string
+	for _, tag := range tags {
+		suggestedTags = append(suggestedTags, tag.Original())
 	}
-
-	prompt := promptui.Select{
-		Label:     "Select next tag",
-		Items:     tags,
-		Templates: tagsTemplates,
-	}
-	_, result, err := prompt.Run()
-	common.CheckIfError(err)
-	newTag := fmt.Sprintf("%s%s", v, result)
+	newTagChoice := shell.MultiChoice(suggestedTags, infoString)
+	newTag := suggestedTags[newTagChoice]
 
 	head, err := repo.Head()
 	common.CheckIfError(err)
 	_, err = repo.CreateTag(newTag, head.Hash(), nil)
 
-	pushTemplates := &promptui.SelectTemplates{
-		Label:    "{{ . }}?",
-		Active:   "\U000025B8 {{ . | green }}",
-		Inactive: "  {{ . | cyan }}",
-		Selected: "\U000025B8 {{ . | green }}",
-	}
+	pushChoice := shell.MultiChoice([]string{"Yes", "No"}, "Push to repo (with tags)")
 
-	prompt = promptui.Select{
-		Label:     "Push to repo (with tags)?",
-		Items:     []string{"Yes", "No"},
-		Templates: pushTemplates,
-	}
-
-	_, result, err = prompt.Run()
-	common.CheckIfError(err)
-
-	if result == "Yes" {
+	if pushChoice == 0 {
 		err = exec.Command("git", "push").Run()
 		common.CheckIfError(err)
 		err = exec.Command("git", "push", "--tags").Run()
