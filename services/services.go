@@ -13,7 +13,7 @@ import (
 	"regexp"
 )
 
-func UpdateTag(vPrefix bool, prereleasePrefix string) {
+func UpdateTag(vPrefix bool, prereleasePrefix string, forceProdTags bool, forceDevTags bool) {
 	gitRoot, err := exec.Command("git", "rev-parse", "--show-toplevel").Output()
 	re := regexp.MustCompile(`\r?\n`)
 	gitRootString := re.ReplaceAllString(string(gitRoot), "")
@@ -28,14 +28,16 @@ func UpdateTag(vPrefix bool, prereleasePrefix string) {
 	latestVersion, err := utgit.GetLatestTagFromRepository(repo)
 	common.CheckIfError(err)
 
-	var masterBranch = regexp.MustCompile(`master$`)
-	var developmentBranch = regexp.MustCompile(`develop|feature`)
+	masterBranch := regexp.MustCompile(`master$`)
+	developmentBranch := regexp.MustCompile(`develop|feature`)
+	isProdBranch := masterBranch.MatchString(headRef.String())
+	isDevBranch := developmentBranch.MatchString(headRef.String())
 
-	if masterBranch.MatchString(headRef.String()) {
+	if (isProdBranch && !forceDevTags) || forceProdTags {
 		stableTags, err := tag.GetStableTags(latestVersion)
 		common.CheckIfError(err)
 		runUpdate("Stable", latestVersion, stableTags, repo, vPrefix)
-	} else if developmentBranch.MatchString(headRef.String()) {
+	} else if (isDevBranch && !forceProdTags) || forceDevTags {
 		developmentTags, err := tag.GetDevelopmentTags(latestVersion, prereleasePrefix)
 		common.CheckIfError(err)
 		runUpdate("Development or feature branch", latestVersion, developmentTags, repo, vPrefix)
