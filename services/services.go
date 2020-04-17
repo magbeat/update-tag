@@ -2,8 +2,8 @@ package services
 
 import (
 	"fmt"
+	"github.com/AlecAivazis/survey/v2"
 	"github.com/Masterminds/semver/v3"
-	"github.com/abiosoft/ishell"
 	"github.com/go-git/go-git/v5"
 	"github.com/magbeat/update-tag/services/internal/common"
 	utgit "github.com/magbeat/update-tag/services/internal/git"
@@ -45,9 +45,8 @@ func UpdateTag(vPrefix bool, prereleasePrefix string) {
 }
 
 func runUpdate(branch string, tag *semver.Version, tags []*semver.Version, repo *git.Repository, vPrefix bool) {
-	shell := ishell.New()
-
-	infoString := fmt.Sprintf("branch: %s\ncurrent tag: %s\nnext tag:", branch, tag.Original())
+	fmt.Printf("\nCurrent Branch: %s\n", branch)
+	fmt.Printf("Current Tag   : %s\n\n", tag.Original())
 
 	v := ""
 	if vPrefix {
@@ -58,16 +57,31 @@ func runUpdate(branch string, tag *semver.Version, tags []*semver.Version, repo 
 	for _, tag := range tags {
 		suggestedTags = append(suggestedTags, fmt.Sprintf("%s%s", v, tag.String()))
 	}
-	newTagChoice := shell.MultiChoice(suggestedTags, infoString)
-	newTag := suggestedTags[newTagChoice]
+
+	var qs = []*survey.Question{
+		{
+			Name:   "tag",
+			Prompt: &survey.Select{Message: "Next tag:", Options: suggestedTags},
+		},
+		{
+			Name:   "push",
+			Prompt: &survey.Select{Message: "Push to remote (with tags):", Options: []string{"Yes", "No"}, Default: "Yes"},
+		},
+	}
+
+	answers := struct {
+		Tag  string
+		Push string
+	}{}
+
+	err := survey.Ask(qs, &answers)
+	common.CheckIfError(err)
 
 	head, err := repo.Head()
 	common.CheckIfError(err)
-	_, err = repo.CreateTag(newTag, head.Hash(), nil)
+	_, err = repo.CreateTag(answers.Tag, head.Hash(), nil)
 
-	pushChoice := shell.MultiChoice([]string{"Yes", "No"}, "Push to repo (with tags)")
-
-	if pushChoice == 0 {
+	if answers.Push == "Yes" {
 		err = exec.Command("git", "push").Run()
 		common.CheckIfError(err)
 		err = exec.Command("git", "push", "--tags").Run()
