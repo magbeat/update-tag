@@ -15,15 +15,15 @@ func TestGetDevelopmentTags(t *testing.T) {
 		want             []*semver.Version
 	}{
 		{createVersion("0.0.0"), "RC",
-			[]*semver.Version{createVersion("1.0.0-RC0"), createVersion("0.1.0-RC0")}},
-		{createVersion("1.0.0-RC123"), "RC",
-			[]*semver.Version{createVersion("1.0.0-RC124"), createVersion("1.1.0-RC0")}},
-		{createVersion("1.0.0-RC0"), "RC",
-			[]*semver.Version{createVersion("1.0.0-RC1"), createVersion("1.1.0-RC0")}},
-		{createVersion("1.1.0-RC0"), "RC",
-			[]*semver.Version{createVersion("2.0.0-RC0"), createVersion("1.1.0-RC1")}},
-		{createVersion("1.0.0-TEST11"), "TEST",
-			[]*semver.Version{createVersion("1.0.0-TEST12"), createVersion("1.1.0-TEST0")}},
+			[]*semver.Version{createVersion("1.0.0-RC.0"), createVersion("0.1.0-RC.0")}},
+		{createVersion("1.0.0-RC.123"), "RC",
+			[]*semver.Version{createVersion("1.0.0-RC.124"), createVersion("1.1.0-RC.0")}},
+		{createVersion("1.0.0-RC.0"), "RC",
+			[]*semver.Version{createVersion("1.0.0-RC.1"), createVersion("1.1.0-RC.0")}},
+		{createVersion("1.1.0-RC.0"), "RC",
+			[]*semver.Version{createVersion("2.0.0-RC.0"), createVersion("1.1.0-RC.1")}},
+		{createVersion("1.0.0-TEST.11"), "TEST",
+			[]*semver.Version{createVersion("1.0.0-TEST.12"), createVersion("1.1.0-TEST.0")}},
 	}
 
 	for _, test := range tests {
@@ -45,9 +45,9 @@ func TestGetStableTags(t *testing.T) {
 			[]*semver.Version{createVersion("1.0.0"), createVersion("0.1.0"), createVersion("0.0.1")}},
 		{createVersion("v1.1.1"),
 			[]*semver.Version{createVersion("2.0.0"), createVersion("1.2.0"), createVersion("1.1.2")}},
-		{createVersion("v1.0.0-RC2"),
+		{createVersion("v1.0.0-RC.2"),
 			[]*semver.Version{createVersion("1.0.0")}},
-		{createVersion("v1.1.0-RC2"),
+		{createVersion("v1.1.0-RC.2"),
 			[]*semver.Version{createVersion("1.1.0")}},
 	}
 

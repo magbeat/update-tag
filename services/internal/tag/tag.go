@@ -9,7 +9,7 @@ import (
 
 func GetDevelopmentTags(currentVersion *semver.Version, prereleasePrefix string) (versions []*semver.Version, err error) {
 
-	rc0 := fmt.Sprintf("%s0", prereleasePrefix)
+	rc0 := fmt.Sprintf("%s.0", prereleasePrefix)
 	rcNext := nextPrereleaseTag(currentVersion.Prerelease(), prereleasePrefix)
 
 	newMajorVersion, err := semver.NewVersion(currentVersion.String())
@@ -55,6 +55,6 @@ func nextPrereleaseTag(prerelease string, prefix string) string {
 	numberRegex := regexp.MustCompile(`[0-9]+`)
 	versionNum, _ := strconv.Atoi(string(numberRegex.Find([]byte(prerelease))))
 	versionNum++
-	return fmt.Sprintf("%s%d", prefix, versionNum)
+	return fmt.Sprintf("%s.%d", prefix, versionNum)
 }
 
