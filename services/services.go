@@ -28,7 +28,7 @@ func UpdateTag(vPrefix bool, prereleasePrefix string, forceProdTags bool, forceD
 	latestVersion, err := utgit.GetLatestTagFromRepository(repo)
 	common.CheckIfError(err)
 
-	masterBranch := regexp.MustCompile(`master$`)
+	masterBranch := regexp.MustCompile(`master|main`)
 	developmentBranch := regexp.MustCompile(`develop|feature`)
 	isProdBranch := masterBranch.MatchString(headRef.String())
 	isDevBranch := developmentBranch.MatchString(headRef.String())
